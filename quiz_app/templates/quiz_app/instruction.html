@@ -1,0 +1,169 @@
+{% extends "quiz_app/base.html" %}
+
+{% block content %}
+    <style>
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #004aad;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-buttons a {
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .header-buttons a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Instruction Page Styles */
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        h2 {
+            color: #333;
+            text-align: left;
+        }
+
+        ul {
+            list-style-type: decimal;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .checkbox-container input {
+            margin-right: 10px;
+        }
+
+        /* Button */
+        .button-container {
+            margin-top: 15px;
+        }
+
+        .button-container button {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: not-allowed;
+        }
+
+        .button-container button.active {
+            background-color: #28a745;
+            cursor: pointer;
+        }
+
+        .button-container button.active:hover {
+            background-color: #218838;
+        }
+        /* Header styling */
+        .header-bar {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            padding: 10px;
+            color: white;
+        }
+        
+        /* Logo styling */
+        .header-bar img {
+            width: 40px; /* Adjust as needed */
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        /* Title styling */
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+
+    <!-- Header -->
+    {% load static %}
+    <div class="header-bar">
+        <img src="{% static 'quiz_app/images/Logo.jpg' %}">
+        <div class="header-title">Instruction</div>
+    </div>
+
+    <!-- Instruction Container -->
+    <div class="container">
+        <h2>Instructions</h2>
+        <p>Hi <strong>{{ request.user.username }}</strong>, please read the instructions carefully, acknowledge & proceed to start the test.</p>
+
+        <h3>Instructions:</h3>
+        <ul>
+            <li>Test has 10 MCQs, and each question is mandatory to submit the test.</li>
+            <li>Each question has a 2-minute timer; the overall test time is 20 minutes.</li>
+            <li>Before starting the test, you should complete the system compatibility test, like audio check and camera check.</li>
+            <li>While giving the test, you can't move outside the camera zone. If any suspicious activity or cheating is detected, the system will directly discard you from the test.</li>
+            <li>Acknowledge the terms & conditions below to start the test.</li>
+        </ul>
+
+        <!-- Checkbox for Acknowledgment -->
+        <div class="checkbox-container">
+            <input type="checkbox" id="acknowledgeCheckbox">
+            <label for="acknowledgeCheckbox">
+                I agree and understand the given information, respect terms & conditions, and will follow the system-generated rules and regulations.
+            </label>
+        </div>
+
+        <!-- Button (Initially Disabled) -->
+        <div class="button-container">
+            <a href="{% url 'system_compatibility' %}">
+                <button id="checkSystemBtn" disabled>Check System Compatibility</button>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Enable button when checkbox is checked
+        document.getElementById("acknowledgeCheckbox").addEventListener("change", function() {
+            let button = document.getElementById("checkSystemBtn");
+            if (this.checked) {
+                button.classList.add("active");
+                button.removeAttribute("disabled");
+            } else {
+                button.classList.remove("active");
+                button.setAttribute("disabled", "true");
+            }
+        });
+    </script>
+{% endblock %}

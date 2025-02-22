@@ -1,0 +1,190 @@
+/* Global Styles */
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+}
+
+/* Wrapper for Auth Pages */
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+}
+
+/* Container for Auth Pages */
+.auth-container {
+    display: flex;
+    width: 75%;
+    max-width: 900px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    max-height: 80vh; /* Ensures the container has a proper height */
+}
+
+/* Left Side: Background Image */
+/* .auth-left {
+    flex: 1;
+    background: url('{% static "quiz_app/images/login-bg.jpg" %}') no-repeat center center/cover;
+} */
+.auth-left {
+    flex: 1;
+    background: url('{% static "quiz_app/images/login-bg.jpg" %}') no-repeat center center/cover;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh; /* Ensure it covers the full viewport height */
+    height: auto;
+}
+
+
+/* Right Side: Auth Form */
+.auth-right {
+    flex: 1;
+    padding: 40px;
+    background-color: #0a2a66;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Form Container (Used in both Login & Register) */
+.auth-right form {
+    width: 100%;
+    max-width: 350px;
+}
+
+/* Heading */
+.auth-right h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Input Fields */
+.auth-right input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Submit Button */
+.auth-right button {
+    width: 100%;
+    padding: 10px;
+    background-color: #ffd700;
+    color: #0a2a66;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.auth-right button:hover {
+    background-color: #e6c300;
+}
+
+/* Text & Links */
+.auth-right p {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.auth-right a {
+    color: #ffd700;
+    text-decoration: none;
+}
+
+.auth-right a:hover {
+    text-decoration: underline;
+}
+
+/* Register Page Adjustments */
+.register-container {
+    width: 100%;
+    max-width: 400px;
+}
+/* Remove Default Spacing */
+.form-group {
+    margin-bottom: 10px;
+}
+
+/* Adjust Input Field Spacing */
+.auth-right input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Error Message Styling */
+.error {
+    color: red;
+    font-size: 12px;
+    margin-top: -8px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .auth-container {
+        flex-direction: column;
+        width: 90%;
+        max-width: 450px;
+    }
+
+    .auth-left {
+        display: none; /* Hide left image on small screens */
+    }
+
+    .auth-right {
+        flex: none;
+        width: 100%;
+        padding: 30px;
+    }
+}
+button {
+    background-color: blue;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+button:disabled {
+    background-color: gray;
+}
+
+#internetCheckStatus {
+    color: green;
+    font-weight: bold;
+}
+/* Header styling */
+.header-bar {
+    display: flex;
+    align-items: center;
+    background-color: #333;
+    padding: 10px;
+    color: white;
+}
+
+/* Logo styling */
+.header-bar img {
+    width: 40px; /* Adjust as needed */
+    height: 40px;
+    margin-right: 10px;
+}
+
+/* Title styling */
+.header-title {
+    font-size: 20px;
+    font-weight: bold;
+}

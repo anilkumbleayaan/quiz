@@ -1,0 +1,222 @@
+{% extends "quiz_app/base.html" %}
+
+{% block content %}
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        h2 { color: #333; }
+        .test-container { margin-top: 20px; }
+        .test-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-button:hover { background-color: #0056b3; }
+        .disabled { background-color: #ccc; cursor: not-allowed; }
+        .result-container { margin-top: 15px; font-size: 16px; }
+        .photo-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .photo-box {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #f9f9f9;
+        }
+        .photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #fluctuationCanvas {
+            width: 100%;
+            height: 50px;
+            background: #f1f1f1;
+            display: block;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .popup button { margin-top: 10px; }
+        /* Header styling */
+        .header-bar {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            padding: 10px;
+            color: white;
+        }
+        
+        /* Logo styling */
+        .header-bar img {
+            width: 40px; /* Adjust as needed */
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        /* Title styling */
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+    {% load static %}
+    <div class="header-bar">
+        <img src="{% static 'quiz_app/images/Logo.jpg' %}">
+        <div class="header-title">System Compatibility</div>
+    </div>
+    <div class="container">
+        <h2>System Compatibility</h2>
+        <p>Please click on the buttons to check your system compatibility.</p>
+
+        <!-- Audio Test -->
+        <div class="test-container">
+            <label>Audio Test:</label>
+            <button id="audioTest" class="test-button">Verify Voice</button>
+            <div id="audioResult" class="result-container"></div>
+            <canvas id="fluctuationCanvas"></canvas>
+        </div>
+
+        <!-- Camera Test -->
+        <div class="test-container">
+            <label>Camera Test:</label>
+            <button id="turnOnCamera" class="test-button">Turn On Camera</button>
+            <button id="capturePhoto" class="test-button" disabled>Capture Photo</button>
+            
+            <div class="photo-container">
+                <div class="photo-box" id="photo1"></div>
+                <div class="photo-box" id="photo2"></div>
+                <div class="photo-box" id="photo3"></div>
+            </div>
+
+            <video id="video" width="200" height="150" autoplay style="display: none;"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+        </div>
+
+        <!-- Start Quiz Button -->
+        <button id="startQuiz" class="test-button disabled" disabled onclick="window.location.href='{% url 'quiz' %}'">
+            Start Quiz
+        </button>
+    </div>
+
+    <!-- Noise Popup -->
+    <div id="popup" class="popup">
+        <p>Background noise is too high. Please find a quieter environment.</p>
+        <button id="closePopup">OK</button>
+    </div>
+
+    <script>
+        // Audio Test Function
+        document.getElementById("audioTest").addEventListener("click", function() {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                let analyser = audioContext.createAnalyser();
+                let microphone = audioContext.createMediaStreamSource(stream);
+                analyser.fftSize = 256;
+                microphone.connect(analyser);
+
+                let dataArray = new Uint8Array(analyser.frequencyBinCount);
+                let canvas = document.getElementById("fluctuationCanvas");
+                let ctx = canvas.getContext("2d");
+
+                function draw() {
+                    analyser.getByteFrequencyData(dataArray);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = "blue";
+                    dataArray.forEach((value, index) => {
+                        ctx.fillRect(index * 3, canvas.height - value, 2, value);
+                    });
+                    requestAnimationFrame(draw);
+                }
+                draw();
+
+                setTimeout(() => {
+                    let sum = dataArray.reduce((a, b) => a + b, 0);
+                    let avgVolume = sum / dataArray.length;
+                    if (avgVolume > 30) {
+                        document.getElementById("popup").style.display = "block";
+                    } else {
+                        document.getElementById("audioResult").innerHTML = "Quiet environment detected.";
+                    }
+                    stream.getTracks().forEach(track => track.stop());
+                }, 3000);
+            }).catch(error => {
+                document.getElementById("audioResult").innerHTML = "Microphone access denied.";
+            });
+        });
+
+        // Close Popup
+        document.getElementById("closePopup").addEventListener("click", function() {
+            document.getElementById("popup").style.display = "none";
+        });
+
+        // Camera Test
+        let video = document.getElementById("video");
+        let captureButton = document.getElementById("capturePhoto");
+        let turnOnCameraButton = document.getElementById("turnOnCamera");
+        let photoCount = 0;
+
+        turnOnCameraButton.addEventListener("click", function() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.style.display = "block";  
+                    captureButton.disabled = false;  
+                })
+                .catch(function(error) {
+                    alert("Camera access denied or unavailable.");
+                    console.error("Error accessing camera:", error);
+                });
+        });
+
+        function checkPhotos() {
+            if (photoCount === 3) {
+                document.getElementById("startQuiz").classList.remove("disabled");
+                document.getElementById("startQuiz").disabled = false;
+            }
+        }
+
+        captureButton.addEventListener("click", function() {
+            if (photoCount >= 3) return;
+
+            let canvas = document.getElementById("canvas");
+            let context = canvas.getContext("2d");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            let photoBox = document.getElementById("photo" + (photoCount + 1));
+            let img = document.createElement("img");
+            img.src = canvas.toDataURL("image/png");
+            photoBox.innerHTML = "";
+            photoBox.appendChild(img);
+            photoCount++;
+            checkPhotos();
+        });
+    </script>
+{% endblock %}

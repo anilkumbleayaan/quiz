@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="{% static 'quiz_app/css/style.css' %}">
+</head>
+<body>
+    <div class="header-bar">
+        <img src="{% static 'quiz_app/images/Logo.jpg' %}">
+        <div class="header-title">Register</div>
+    </div>
+    <div class="auth-wrapper">
+        <div class="auth-container">
+            <!-- Left Section: Background Image -->
+            <!-- <div class="auth-left"></div> -->
+            <div class="auth-left" style="background: url('{% static 'quiz_app/images/login-bg.jpg' %}') no-repeat center center/cover;"></div>
+
+            <!-- Right Section: Register Form -->
+            <div class="auth-right">
+                <div class="register-container">
+                    <h2>Register</h2>
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li class="{{ message.tags }}">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" name="first_name" placeholder="First Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="last_name" placeholder="Last Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="username" placeholder="Username" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" name="email" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" placeholder="Password" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                        </div>
+                        <button type="submit">Register</button>
+                    </form>
+                    <p>Already have an account? 
+                        <a href="{% url 'login' %}">Log in</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
