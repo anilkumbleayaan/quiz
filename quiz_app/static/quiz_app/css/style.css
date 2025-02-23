@@ -3,6 +3,7 @@ body {
     font-family: Arial, sans-serif;
     background: #f0f2f5;
     margin: 0;
+    overflow: hidden;
 }
 
 /* Wrapper for Auth Pages */
@@ -12,6 +13,7 @@ body {
     align-items: center;
     height: 100vh;
     padding: 20px;
+    overflow: hidden;
 }
 
 /* Container for Auth Pages */
@@ -23,7 +25,8 @@ body {
     overflow: hidden;
     background-color: white;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    max-height: 80vh; /* Ensures the container has a proper height */
+    max-height: 65vh;
+    margin-bottom: 50px;
 }
 
 /* Left Side: Background Image */
@@ -79,7 +82,7 @@ body {
 .auth-right button {
     width: 100%;
     padding: 10px;
-    background-color: #ffd700;
+    background-color: #bbad63;
     color: #0a2a66;
     font-weight: bold;
     border: none;
@@ -141,7 +144,7 @@ body {
     }
 
     .auth-left {
-        display: none; /* Hide left image on small screens */
+        display: none;
     }
 
     .auth-right {
@@ -174,6 +177,7 @@ button:disabled {
     background-color: #333;
     padding: 10px;
     color: white;
+    z-index: 1000;
 }
 
 /* Logo styling */
