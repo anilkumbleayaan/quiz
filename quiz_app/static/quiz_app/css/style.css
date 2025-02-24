@@ -40,7 +40,7 @@ body {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    min-height: 100vh; /* Ensure it covers the full viewport height */
+    min-height: 100vh; 
     height: auto;
 }
 
@@ -182,7 +182,7 @@ button:disabled {
 
 /* Logo styling */
 .header-bar img {
-    width: 40px; /* Adjust as needed */
+    /* width: 40px; */
     height: 40px;
     margin-right: 10px;
 }

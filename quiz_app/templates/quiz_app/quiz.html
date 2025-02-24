@@ -2,9 +2,13 @@
 
 {% block content %}
     <style>
+        
         .container {
             max-width: 600px;
-            margin: 40px auto;
+            margin: auto;
+            margin-top: 10%;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
             background: #fff;
             border-radius: 8px;
@@ -37,7 +41,46 @@
             cursor: pointer;
         }
         .disabled { background-color: #ccc; cursor: not-allowed; }
+
+        #timer {
+            position: fixed; /* Fixed position to stay at the top right */
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.modal-content {
+    padding: 10px;
+}
     </style>
+    {% load static %}
+    <div class="header-bar">
+        <img src="{% static 'quiz_app/images/Logo.jpg' %}">
+        <div class="header-title">Quiz</div>
+    </div>
+    <div id="timer" style="position: absolute; top: 20px; right: 20px; font-size: 18px; font-weight: bold;">
+        Time Left: <span id="time">10:00</span>
+    </div>
 
     <div class="container">
         <h2>Quiz</h2>
@@ -51,7 +94,122 @@
         </div>
     </div>
 
+    <<div id="resultModal" class="modal">
+        <div class="modal-content">
+            <h2>Quiz Results</h2>
+            <p>Your Score: <span id="score"></span> / <span id="total"></span></p>
+            <p>Percentage: <span id="percentage"></span>%</p>
+            <button id="logoutBtn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div id="overlay" class="overlay"></div>
+    
+    <!-- Second modal for logout confirmation -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <h2>Test Completed</h2>
+            <p>You have successfully completed your test.</p>
+            <button onclick="redirectToLogout()">OK</button>
+        </div>
+    </div>
+    <div id="camera-box">
+        <video id="userCamera" autoplay playsinline></video>
+    </div>
+    <div id="timeUpModal" class="modal">
+        <div class="modal-content">
+            <h2>Time's Up!</h2>
+            <p>Your time is over. Your answers have been saved automatically.</p>
+            <button onclick="closeTimeUpModal()">OK</button>
+        </div>
+    </div>
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    
+        .modal-content button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #camera-box {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: 150px;
+        height: 150px;
+        border: 2px solid #007bff;
+        border-radius: 10px;
+        overflow: hidden;
+        background: black;
+    }
+
+    #userCamera {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.modal-content {
+    padding: 10px;
+}
+    </style>
+
     <script>
+
+        let timeLeft = 600; // 10 minutes in seconds
+        let timerInterval;
+
+
+        function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+            document.getElementById("time").textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Start the timer when the quiz loads
+        startTimer();
+
         const questions = [
             { 
                 text: "What is the capital of France?", 
@@ -83,29 +241,42 @@
         let currentQuestionIndex = 0;
         let userAnswers = {};
 
-        function loadQuestion() {
-            const question = questions[currentQuestionIndex];
-            document.getElementById("question-text").innerHTML = `<h3>${question.text}</h3>`;
-            const optionsContainer = document.getElementById("options-container");
-            optionsContainer.innerHTML = "";
-            question.options.forEach(option => {
-                const label = document.createElement("label");
-                label.innerHTML = `<input type="radio" name="option" value="${option}" ${userAnswers[currentQuestionIndex] === option ? "checked" : ""}> ${option}`;
-                label.addEventListener("click", () => {
-                    userAnswers[currentQuestionIndex] = option;
-                });
-                optionsContainer.appendChild(label);
+    function loadQuestion() {
+        const question = questions[currentQuestionIndex];
+        document.getElementById("question-text").innerHTML = `<h3>${question.text}</h3>`;
+        const optionsContainer = document.getElementById("options-container");
+        optionsContainer.innerHTML = "";
+        question.options.forEach(option => {
+            const label = document.createElement("label");
+            label.innerHTML = `<input type="radio" name="option" value="${option}" ${userAnswers[currentQuestionIndex] === option ? "checked" : ""}> ${option}`;
+            label.addEventListener("click", () => {
+                userAnswers[currentQuestionIndex] = option;
+                enableNextButton();
             });
+            optionsContainer.appendChild(label);
+        });
 
-            document.getElementById("prevBtn").disabled = currentQuestionIndex === 0;
-            document.getElementById("prevBtn").classList.toggle("disabled", currentQuestionIndex === 0);
+        document.getElementById("prevBtn").disabled = currentQuestionIndex === 0;
+        document.getElementById("prevBtn").classList.toggle("disabled", currentQuestionIndex === 0);
 
-            if (currentQuestionIndex === questions.length - 1) {
-                document.getElementById("nextBtn").innerText = "Submit Quiz";
-            } else {
-                document.getElementById("nextBtn").innerText = "Next";
-            }
+        if (currentQuestionIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "Submit Quiz";
+        } else {
+            document.getElementById("nextBtn").innerText = "Next";
         }
+        if (!userAnswers[currentQuestionIndex]) {
+            document.getElementById("nextBtn").disabled = true;
+            document.getElementById("nextBtn").classList.add("disabled");
+        } else {
+            document.getElementById("nextBtn").disabled = false;
+            document.getElementById("nextBtn").classList.remove("disabled");
+        }
+    }
+
+    function enableNextButton() {
+        document.getElementById("nextBtn").disabled = false;
+        document.getElementById("nextBtn").classList.remove("disabled");
+    }
 
         document.getElementById("prevBtn").addEventListener("click", function() {
             if (currentQuestionIndex > 0) {
@@ -115,14 +286,99 @@
         });
 
         document.getElementById("nextBtn").addEventListener("click", function() {
-            if (currentQuestionIndex < questions.length - 1) {
-                currentQuestionIndex++;
-                loadQuestion();
-            } else {
-                alert("Quiz Submitted!"); // Later, replace this with backend submission
-            }
-        });
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            submitQuiz(); // Show results only after all questions are completed
+        }
+    });
+    function submitQuiz() {
+        clearInterval(timerInterval);
+    
+        // Calculate score
+        let correctAnswers = Object.keys(userAnswers).reduce(
+            (acc, key) => acc + (userAnswers[key] === questions[key].answer ? 1 : 0),
+            0
+        );
+        let totalQuestions = questions.length;
+        let percentage = ((correctAnswers / totalQuestions) * 100).toFixed(2);
+    
+        // Update modal
+        document.getElementById("score").innerText = correctAnswers;
+        document.getElementById("total").innerText = totalQuestions;
+        document.getElementById("percentage").innerText = percentage;
+    
+        // Show result modal & overlay
+        document.getElementById("resultModal").style.display = "block";
+        document.getElementById("overlay").style.display = "block";
+    }
+        
+    function logout() {
+        // Hide result modal and show logout confirmation modal
+        document.getElementById("resultModal").style.display = "none";
+        document.getElementById("logoutModal").style.display = "block";
+    }
+        
+    function redirectToLogout() {
+        // Redirect or handle logout
+        window.location.href = "/logout";
+    }
 
-        loadQuestion();
+    function closeModal() {
+        document.getElementById("resultModal").style.display = "none";
+    }
+    function closeModal() {
+        document.getElementById("resultModal").style.display = "none";
+    }
+    // Function to start the webcam
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                document.getElementById("userCamera").srcObject = stream;
+            })
+            .catch(error => {
+                console.error("Camera access denied:", error);
+                alert("Please enable camera access for the quiz.");
+            });
+    }
+
+    // Function to stop the webcam
+    function stopCamera() {
+        let video = document.getElementById("userCamera");
+        let stream = video.srcObject;
+        if (stream) {
+            let tracks = stream.getTracks();
+            tracks.forEach(track => track.stop()); // Stop all camera tracks
+            video.srcObject = null;
+        }
+    }
+
+    // Call startCamera when quiz begins
+    window.onload = startCamera;
+
+    // Stop the camera when the user logs out
+    function logout() {
+        stopCamera();
+        document.getElementById("resultModal").style.display = "none";
+        document.getElementById("logoutModal").style.display = "block";
+    }
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+                updateTimerDisplay();
+            } else {
+                clearInterval(timerInterval);
+                showTimeUpModal(); // Show time-up popup
+                submitQuiz(); // Automatically store answers
+            }
+        }, 1000); // Update every second
+    }
+
+    function showTimeUpModal() {
+        document.getElementById("timeUpModal").style.display = "block";
+    }
+    loadQuestion();
     </script>
 {% endblock %}

@@ -7,7 +7,7 @@
     <title>Login | Quiz App</title>
     <link rel="stylesheet" type="text/css" href="{% static 'quiz_app/css/style.css' %}">
 </head>
-<body style="overflow: hidden;">
+<body>
     <div class="header-bar">
         <img src="{% static 'quiz_app/images/Logo.jpg' %}">
         <div class="header-title">Login</div>
@@ -27,7 +27,7 @@
                     <input type="email" name="email" placeholder="Email" required>
                     <input type="password" name="password" placeholder="Password" required>
                     
-                    <button type="submit">Login</button>
+                    <button type="submit" style="width: 60px; align-items: center;">Login</button>
                     
                     <p>Don't have an account? 
                         <a href="{% url 'register' %}">Register</a>

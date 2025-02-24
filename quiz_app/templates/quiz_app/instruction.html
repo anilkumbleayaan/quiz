@@ -104,7 +104,7 @@
         
         /* Logo styling */
         .header-bar img {
-            width: 40px; /* Adjust as needed */
+            /* width: 40px; */
             height: 40px;
             margin-right: 10px;
         }
@@ -120,7 +120,7 @@
     {% load static %}
     <div class="header-bar">
         <img src="{% static 'quiz_app/images/Logo.jpg' %}">
-        <div class="header-title">Instruction</div>
+        <div class="header-title">Instructions</div>
     </div>
 
     <!-- Instruction Container -->
@@ -131,7 +131,6 @@
         <h3>Instructions:</h3>
         <ul>
             <li>Test has 10 MCQs, and each question is mandatory to submit the test.</li>
-            <li>Each question has a 2-minute timer; the overall test time is 20 minutes.</li>
             <li>Before starting the test, you should complete the system compatibility test, like audio check and camera check.</li>
             <li>While giving the test, you can't move outside the camera zone. If any suspicious activity or cheating is detected, the system will directly discard you from the test.</li>
             <li>Acknowledge the terms & conditions below to start the test.</li>
