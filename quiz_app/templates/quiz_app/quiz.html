@@ -33,14 +33,24 @@
             justify-content: space-between;
         }
         .nav-button {
-            background-color: #007bff;
+            background-color: #0E62FF;
             color: white;
             padding: 10px 15px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        .disabled { background-color: #ccc; cursor: not-allowed; }
+        /* .disabled { background-color: white; color: white; cursor: not-allowed; } */
+
+        .nav-button .disabled{
+            background-color: rgb(204, 52, 52); 
+            color: white; 
+            cursor: not-allowed;
+        }
+
+        button:disabled {
+            background-color: #b2b2b2;
+        }
 
         #timer {
             position: fixed; /* Fixed position to stay at the top right */
@@ -54,6 +64,8 @@
             border-radius: 5px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
         }
+
+
         .modal {
     display: none;
     position: fixed;
@@ -72,8 +84,25 @@
 .modal-content {
     padding: 10px;
 }
+
+
     </style>
     {% load static %}
+    <head>
+        <script async src="https://docs.opencv.org/4.x/opencv.js" onload="cvLoaded()" onerror="cvError()"></script>
+        <script>
+            function cvLoaded() {
+                console.log("OpenCV.js Loaded Successfully!");
+            }
+
+            function cvError() {
+                console.error("Failed to load OpenCV.js");
+                alert("Error: OpenCV failed to load. Check your internet connection.");
+            }
+        </script>
+
+    </head>
+
     <div class="header-bar">
         <img src="{% static 'quiz_app/images/Logo.jpg' %}">
         <div class="header-title">Quiz</div>
@@ -99,7 +128,7 @@
             <h2>Quiz Results</h2>
             <p>Your Score: <span id="score"></span> / <span id="total"></span></p>
             <p>Percentage: <span id="percentage"></span>%</p>
-            <button id="logoutBtn" onclick="logout()">Logout</button>
+            <button id="logoutBtn" onclick="logout()">OK</button>
         </div>
     </div>
     
@@ -110,7 +139,7 @@
         <div class="modal-content">
             <h2>Test Completed</h2>
             <p>You have successfully completed your test.</p>
-            <button onclick="redirectToLogout()">OK</button>
+            <button onclick="redirectToLogout()">Logout</button>
         </div>
     </div>
     <div id="camera-box">
@@ -123,6 +152,12 @@
             <button onclick="closeTimeUpModal()">OK</button>
         </div>
     </div>
+
+    <div id="alert-box"
+        style="display:none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: red; color: white; padding: 10px; border-radius: 5px;">
+        You're not looking at the screen!
+    </div>
+
     <style>
         .modal {
             display: none;
@@ -195,8 +230,8 @@
 }
     </style>
 
-    <script>
 
+    <script>
         let timeLeft = 600; // 10 minutes in seconds
         let timerInterval;
 
@@ -332,10 +367,37 @@
         document.getElementById("resultModal").style.display = "none";
     }
     // Function to start the webcam
+    // function startCamera() {
+    //     navigator.mediaDevices.getUserMedia({ video: true })
+    //         .then(stream => {
+    //             document.getElementById("userCamera").srcObject = stream;
+    //         })
+    //         .catch(error => {
+    //             console.error("Camera access denied:", error);
+    //             alert("Please enable camera access for the quiz.");
+    //         });
+    // }
+
+    // // Function to stop the webcam
+    // function stopCamera() {
+    //     let video = document.getElementById("userCamera");
+    //     let stream = video.srcObject;
+    //     if (stream) {
+    //         let tracks = stream.getTracks();
+    //         tracks.forEach(track => track.stop()); // Stop all camera tracks
+    //         video.srcObject = null;
+    //     }
+    // }
+
+    let video = document.getElementById("userCamera");
+
+    //start camera
     function startCamera() {
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
-                document.getElementById("userCamera").srcObject = stream;
+                video.srcObject = stream;
+                video.play();
+                initOpenCV();
             })
             .catch(error => {
                 console.error("Camera access denied:", error);
@@ -343,16 +405,101 @@
             });
     }
 
-    // Function to stop the webcam
+    //stop camera
     function stopCamera() {
-        let video = document.getElementById("userCamera");
         let stream = video.srcObject;
         if (stream) {
             let tracks = stream.getTracks();
-            tracks.forEach(track => track.stop()); // Stop all camera tracks
+            tracks.forEach(track => track.stop());
             video.srcObject = null;
         }
     }
+    
+    let faceCascade, eyeCascade;
+        let isLookingAway = false;
+
+        async function loadCascade(url) {
+            let response = await fetch("http://127.0.0.1:8000/quiz/");
+            let data = await response.arrayBuffer();
+            return new cv.CascadeClassifier(new Uint8Array(data));
+        }
+
+        async function initOpenCV() {
+            console.log("Initializing OpenCV...");
+
+            faceCascade = await loadCascade("./haarcascade_frontalface_default.xml");
+            eyeCascade = await loadCascade("./haarcascade_eye.xml");
+
+            console.log("Face detection models loaded!");
+            startFaceDetection();
+            
+            return new Promise(resolve => {
+                cv.onRuntimeInitialized = resolve;
+            });
+        }
+
+        // Start Face Detection
+        function startFaceDetection() {
+            let video = document.getElementById("userCamera");
+            let canvas = document.createElement("canvas");
+            let ctx = canvas.getContext("2d");
+
+            function processFrame() {
+                if (video.videoWidth === 0 || video.videoHeight === 0) {
+                    requestAnimationFrame(processFrame);
+                    return;
+                }
+
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                let src = cv.imread(canvas);
+                let gray = new cv.Mat();
+                cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+
+                let faces = new cv.RectVector();
+                faceCascade.detectMultiScale(gray, faces, 1.1, 3, 0);
+
+                if (faces.size() > 0) {
+                    let faceRect = faces.get(0);
+                    let faceROI = gray.roi(faceRect);
+                    let eyes = new cv.RectVector();
+                    eyeCascade.detectMultiScale(faceROI, eyes, 1.1, 3, 0);
+
+                    if (eyes.size() < 1) {
+                        if (!isLookingAway) {
+                            isLookingAway = true;
+                            alertUser("You're not looking at the screen!");
+                        }
+                    } else {
+                        isLookingAway = false;
+                    }
+
+                    faceROI.delete();
+                    eyes.delete();
+                } else {
+                    console.log("No face detected.");
+                }
+
+                src.delete();
+                gray.delete();
+                faces.delete();
+
+                requestAnimationFrame(processFrame);
+            }
+
+            requestAnimationFrame(processFrame);
+        }
+
+        // Alert user
+        function alertUser(message) {
+            let alertBox = document.getElementById("alert-box");
+            alertBox.innerText = message;
+            alertBox.style.display = "block";
+            setTimeout(() => alertBox.style.display = "none", 2000);
+        }
+    
 
     // Call startCamera when quiz begins
     window.onload = startCamera;
