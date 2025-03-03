@@ -10,7 +10,7 @@ from django.contrib import messages
 from .models import Profile 
 from django.contrib.auth.decorators import login_required 
 from django.contrib.auth import get_user_model
-
+from .models import QuizScore
 def register(request):
     if request.method == "POST":
         first_name = request.POST.get("first_name")
@@ -124,3 +124,13 @@ def system_compatibility_view(request):
 
 def quiz_view(request):
     return render(request, "quiz_app/quiz.html")
+@login_required
+def submit_quiz(request):
+    if request.method == "POST":
+        user = request.user
+        score = calculate_quiz_score(request)  # This function should already exist
+
+        # Save score in the database
+        QuizScore.objects.create(user=user, score=score)
+
+    return None

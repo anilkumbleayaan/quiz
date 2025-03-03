@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import login_view, logout_view, instruction_view, quiz_view, system_compatibility_view
+from .views import login_view, logout_view, instruction_view, quiz_view, system_compatibility_view, submit_quiz
 from . import views
 from .views import register
 
@@ -12,4 +12,5 @@ urlpatterns = [
     path('instruction/', instruction_view, name='instruction'),  # New instruction page
     path('quiz/', quiz_view, name='quiz'),
     path('system-compatibility/', system_compatibility_view, name='system_compatibility'),
+    path("submit/", submit_quiz, name="submit_quiz"),
 ]

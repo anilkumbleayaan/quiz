@@ -58,7 +58,7 @@
             right: 20px;
             font-size: 18px;
             font-weight: bold;
-            background-color: #007bff;
+            /* background-color: #007bff; */
             color: white;
             padding: 10px 15px;
             border-radius: 5px;
@@ -76,7 +76,7 @@
     width: 400px;
     background: white;
     padding: 20px;
-    border-radius: 8px;
+    /* border-radius: 8px; */
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
@@ -190,7 +190,7 @@
             color: white;
             padding: 10px 15px;
             border: none;
-            border-radius: 5px;
+            /* border-radius: 5px; */
             cursor: pointer;
         }
         #camera-box {
@@ -200,7 +200,7 @@
         width: 150px;
         height: 150px;
         border: 2px solid #007bff;
-        border-radius: 10px;
+        /* border-radius: 10px; */
         overflow: hidden;
         background: black;
     }
@@ -246,32 +246,58 @@
         startTimer();
 
         const questions = [
-            { 
-                text: "What is the capital of France?", 
-                options: ["Berlin", "Madrid", "Paris", "Rome"], 
-                answer: "Paris" 
-            },
-            { 
-                text: "Which language is used for web development?", 
-                options: ["Python", "Java", "JavaScript", "C++"], 
-                answer: "JavaScript" 
-            },
-            { 
-                text: "What does CPU stand for?", 
-                options: ["Central Process Unit", "Central Processing Unit", "Computer Personal Unit", "Control Processing Unit"], 
-                answer: "Central Processing Unit" 
-            },
-            { 
-                text: "Which is the largest planet in our Solar System?", 
-                options: ["Earth", "Jupiter", "Saturn", "Mars"], 
-                answer: "Jupiter" 
-            },
-            { 
-                text: "Who discovered gravity?", 
-                options: ["Albert Einstein", "Isaac Newton", "Galileo Galilei", "Marie Curie"], 
-                answer: "Isaac Newton" 
-            }
-        ];
+                    { 
+                        text: "What is the capital of France?", 
+                        options: ["Berlin", "Madrid", "Paris", "Rome"], 
+                        answer: "Paris" 
+                    },
+                    { 
+                        text: "Which language is used for web development?", 
+                        options: ["Python", "Java", "JavaScript", "C++"], 
+                        answer: "JavaScript" 
+                    },
+                    { 
+                        text: "What does CPU stand for?", 
+                        options: ["Central Process Unit", "Central Processing Unit", "Computer Personal Unit", "Control Processing Unit"], 
+                        answer: "Central Processing Unit" 
+                    },
+                    { 
+                        text: "Which is the largest planet in our Solar System?", 
+                        options: ["Earth", "Jupiter", "Saturn", "Mars"], 
+                        answer: "Jupiter" 
+                    },
+                    { 
+                        text: "Who discovered gravity?", 
+                        options: ["Albert Einstein", "Isaac Newton", "Galileo Galilei", "Marie Curie"], 
+                        answer: "Isaac Newton" 
+                    },
+                    { 
+                        text: "What is the chemical symbol for water?", 
+                        options: ["O2", "H2O", "CO2", "HO"], 
+                        answer: "H2O" 
+                    },
+                    { 
+                        text: "Which continent is known as the 'Dark Continent'?", 
+                        options: ["Asia", "Europe", "Africa", "Australia"], 
+                        answer: "Africa" 
+                    },
+                    { 
+                        text: "Who wrote 'Hamlet'?", 
+                        options: ["Charles Dickens", "William Shakespeare", "Leo Tolstoy", "Mark Twain"], 
+                        answer: "William Shakespeare" 
+                    },
+                    { 
+                        text: "What is the square root of 64?", 
+                        options: ["6", "7", "8", "9"], 
+                        answer: "8" 
+                    },
+                    { 
+                        text: "Which gas do plants use for photosynthesis?", 
+                        options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], 
+                        answer: "Carbon Dioxide" 
+                    }
+                ];
+
 
         let currentQuestionIndex = 0;
         let userAnswers = {};
